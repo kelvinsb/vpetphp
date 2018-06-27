@@ -8,10 +8,51 @@
 
 <?php
 	$conexao = new Conexao();
-	$conexao->conectar();
-	$resultado = $conexao->listarPets(1);
+	$conta = new Usuario();
+	//
 		if(isset($_POST["act"])){
-			if($_POST["act"]==="criar") {
+			if($_POST["act"]==="cadastrar") {
+				$usuario = !empty($_POST['usuario']) ? trim($_POST['usuario']) :  null;
+				$senha = !empty($_POST['senha']) ? trim($_POST['senha']) :  null;
+				$email = !empty($_POST['email']) ? trim($_POST['email']) :  null;
+
+				$cadastrado = $conexao->cadastrarUsuario($usuario, $senha, $email);
+				if($cadastrado) {
+					$resposta = array(
+						"status" => true,
+						"name" => $usuario
+					);
+					$json_resposta = json_encode($resposta);
+					echo $json_resposta;
+					return;
+				}
+				$resposta = array(
+					"status" => false,
+				);
+				$json_resposta = json_encode($resposta);
+				echo $json_resposta;
+				return;
+			}
+			elseif($_POST["act"]==="login") {
+				$usuario = !empty($_POST['usuario']) ? trim($_POST['usuario']) :  null;
+				$senha = !empty($_POST['senha']) ? trim($_POST['senha']) :  null;
+
+				$logado = $conexao->logarUsuario($usuario, $senha);
+				if($logado) {
+					$json_resposta = json_encode(array(
+						"status" => true,
+						"name" => $usuario
+					));
+					echo $json_resposta;
+					return;
+				}
+				$json_resposta = json_encode(array(
+					"status" => false
+				));
+				echo $json_resposta;
+				return;
+			}
+			elseif($_POST["act"]==="criar") {
 				$criado = $conexao->CriarPet($_POST["nome"], 1);
 				if($criado==true || $criado ==false) {
 					$resposta = array(
@@ -64,6 +105,7 @@
 					echo $dados;
 				}
 			}
+			
 		}
 		
 	

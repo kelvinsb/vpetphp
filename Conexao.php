@@ -6,10 +6,10 @@
 		private $user = DBUSER;
 		private $pw = DBPW;
 		private $dbname = DBNAME;
-		static $tempoExec = 20;//tempo de atualização do código em segundos
+		static $tempoExec = 2;//tempo de atualização do código em segundos
 
 		private $conexao;
-		function conectar() {
+		public function __construct() {
 			try {
 				$host = $this->host;
 				$db = $this->dbname;
@@ -25,9 +25,9 @@
 		function fecharConexao() {
 			$this->conexao=null; 
 		}
-		function listarPets($usuario_id) {
-
-			$qr = $this->conexao->prepare("select * from pet where usuario_id = :usuario_id");
+		function listarPets() {
+			$usuario_id = $_SESSION['usuario_id'];
+			$qr = $this->conexao->prepare("SELECT * FROM pet WHERE usuario_id = :usuario_id");
 			$qr->bindParam(':usuario_id', $usuario_id);
 			if($qr->execute()) {
 				$resultado = $qr->fetchAll(PDO::FETCH_ASSOC);
@@ -36,22 +36,58 @@
 			}
 			return false;
 		}
-		function verSeTem($usuario_id, $name) {
-			$qr1 = $this->conexao->prepare("SELECT * FROM pet where usuario_id = :usuario_id AND name = :name");
+		function cadastrarUsuario($usuario, $senha, $email) {
+			$qr1 = $this->conexao->prepare("SELECT usuario FROM usuario WHERE usuario = :usuario ");
+			$qr1->bindParam(':usuario', $usuario);
+			$qr1->fetchAll(PDO::FETCH_ASSOC);
+			$qr1->execute();
+			if($qr1->rowCount() == 0) {
+				$senhaHash = password_hash($senha, PASSWORD_BCRYPT, array("cost" => 12));
+				$qr = $this->conexao->prepare("INSERT INTO usuario(usuario,senha,email) VALUES(:usuario, :senha, :email)");
+				$qr->bindParam(':usuario', $usuario);
+				$qr->bindParam(':senha', $senhaHash);
+				$qr->bindParam(':email', $email);
+				if($qr->execute()) {
+					return true;
+				}
+			} else {
+				return false;
+			}
+		}
+		function logarUsuario($usuario, $senha) {
+			$qr = $this->conexao->prepare("SELECT  id,senha, usuario FROM usuario WHERE usuario = :usuario");
+			$qr->bindParam(':usuario', $usuario);
+			$qr->execute();
+			$conta = $qr->fetch(PDO::FETCH_ASSOC);
+			if($conta != false) {
+				$validarSenha = password_verify($senha, $conta["senha"]);
+				if($validarSenha) {
+					$_SESSION['usuario_id'] = $conta['id'];
+					$_SESSION['logado_em']  =  time();
+					return true;
+				}
+			}
+			return false;
+
+		}
+		function verSeTem($name) {
+			$usuario_id = $_SESSION['usuario_id'];
+			$qr1 = $this->conexao->prepare("SELECT * FROM pet WHERE usuario_id = :usuario_id AND name = :name");
 			$qr1->bindParam(':usuario_id', $usuario_id);
 			$qr1->bindParam(':name', $name);
 			$qr1->fetchAll(PDO::FETCH_ASSOC);
 			$qr1->execute();
 			return $qr1->rowCount();
 		}
-		function criarPet($name, $usuario_id) {
-			$verificar = self::verSeTem($usuario_id, $name);
+		function criarPet($name) {			
+			$verificar = self::verSeTem($name);
+			$usuario_id = $_SESSION['usuario_id'];
 			
 			if($verificar>0)
 			{
 				return false;
 			}
-			$qr = $this->conexao->prepare("insert into pet(name,happy,hunger,health,sick,tired,dirty,sad,sleeping,faliceu,usuario_id, deltaTime, lights) values(:name, :happy, :hunger, :health, :sick, :tired, :dirty, :sad, :sleeping, :faliceu, :usuario_id, :deltaTime, :lights);");
+			$qr = $this->conexao->prepare("INSERT INTO pet(name,happy,hunger,health,sick,tired,dirty,sad,sleeping,faliceu,usuario_id, deltaTime, lights) VALUES(:name, :happy, :hunger, :health, :sick, :tired, :dirty, :sad, :sleeping, :faliceu, :usuario_id, :deltaTime, :lights);");
 			$happy = 100;
 			$hunger = 0;
 			$health = 100;
@@ -84,8 +120,10 @@
 		
 			return false;
 		}
-		function feed($name, $usuario_id, $amount) {
-			$qr1 = $this->conexao->prepare("SELECT hunger,sick FROM pet where usuario_id =:usuario_id AND name = :name");
+		function feed($name, $amount) {
+			$qr1 = $this->conexao->prepare("SELECT hunger,sick FROM pet WHERE usuario_id =:usuario_id AND name = :name");
+
+			$usuario_id = $_SESSION['usuario_id'];
 			$qr1->bindParam(':usuario_id', $usuario_id);
 			$qr1->bindParam(':name', $name);
 			if($qr1->execute()) {
@@ -109,8 +147,10 @@
 			}
 			return false;
 		}
-		function flush($name, $usuario_id) {
-			$qr1 = $this->conexao->prepare("SELECT health FROM pet where usuario_id = :usuario_id AND name = :name");
+		function flush($name) {
+			$qr1 = $this->conexao->prepare("SELECT health FROM pet WHERE usuario_id = :usuario_id AND name = :name");
+
+			$usuario_id = $_SESSION['usuario_id'];
 			$qr1->bindParam(':usuario_id', $usuario_id);
 			$qr1->bindParam(':name', $name);
 			if($qr1->execute()) {
@@ -121,7 +161,7 @@
 				if($vida>100) {
 					$vida = 100;
 				}
-				$qr = $this->conexao->prepare("UPDATE pet SET dirty = :dirty, health = :health where usuario_id = :usuario_id and name = :name");
+				$qr = $this->conexao->prepare("UPDATE pet SET dirty = :dirty, health = :health WHERE usuario_id = :usuario_id and name = :name");
 				$qr->bindParam(':usuario_id', $usuario_id);
 				$qr->bindParam(':name', $name);
 				$qr->bindParam(':dirty', $dirty);
@@ -132,8 +172,9 @@
 			}
 			return false;
 		}
-		function play($name, $usuario_id, $pontos) {
-			$qr1 = $this->conexao->prepare("SELECT happy, hunger FROM pet where usuario_id = :usuario_id AND name = :name");
+		function play($name, $pontos) {
+			$qr1 = $this->conexao->prepare("SELECT happy, hunger FROM pet WHERE usuario_id = :usuario_id AND name = :name");
+			$usuario_id = $_SESSION['usuario_id'];
 			$qr1->bindParam(':usuario_id', $usuario_id);
 			$qr1->bindParam(':name', $name);
 			if($qr1->execute()) {
@@ -147,7 +188,7 @@
 					}
 				}
 				$hunger+=1;
-				$qr = $this->conexao->prepare("UPDATE pet SET happy = :happy, hunger = :hunger where usuario_id = :usuario_id and name = :name");
+				$qr = $this->conexao->prepare("UPDATE pet SET happy = :happy, hunger = :hunger WHERE usuario_id = :usuario_id AND name = :name");
 				$qr->bindParam(':usuario_id', $usuario_id);
 				$qr->bindParam(':name', $name);
 				$qr->bindParam(':happy', $happy);
@@ -158,8 +199,10 @@
 			}
 			return false;
 		}
-		function cure($name, $usuario_id) {
-			$qr1 = $this->conexao->prepare("SELECT sick, health FROM pet where usuario_id = :usuario_id AND name = :name");
+		function cure($name) {
+			$qr1 = $this->conexao->prepare("SELECT sick, health FROM pet WHERE usuario_id = :usuario_id AND name = :name");
+
+			$usuario_id = $_SESSION['usuario_id'];
 			$qr1->bindParam(':usuario_id', $usuario_id);
 			$qr1->bindParam(':name', $name);
 			if($qr1->execute()) {
@@ -192,8 +235,10 @@
 			}
 			return false;
 		}
-		function lights($name, $usuario_id) {
-			$qr1 = $this->conexao->prepare("SELECT lights FROM pet where usuario_id = :usuario_id AND name = :name");
+		function lights($name) {
+			$qr1 = $this->conexao->prepare("SELECT lights FROM pet WHERE usuario_id = :usuario_id AND name = :name");
+
+			$usuario_id = $_SESSION['usuario_id'];
 			$qr1->bindParam(':usuario_id', $usuario_id);
 			$qr1->bindParam(':name', $name);
 			if($qr1->execute()) {
@@ -214,8 +259,10 @@
 			}
 			return False;
 		}
-		function getData($name, $usuario_id) {
-			$qr1 = $this->conexao->prepare("SELECT * FROM pet where usuario_id = :usuario_id AND name = :name");
+		function getData($name) {
+			$qr1 = $this->conexao->prepare("SELECT * FROM pet WHERE usuario_id = :usuario_id AND name = :name");
+
+			$usuario_id = $_SESSION['usuario_id'];
 			$qr1->bindParam(':usuario_id', $usuario_id);
 			$qr1->bindParam(':name', $name);
 			if($qr1->execute()) {
@@ -226,8 +273,10 @@
 			return false;
 
 		}
-		function petExist($name, $usuario_id) {
-			$qr1 = $this->conexao->prepare("SELECT * FROM pet where usuario_id = :usuario_id AND name = :name");
+		function petExist($name) {
+			$qr1 = $this->conexao->prepare("SELECT * FROM pet WHERE usuario_id = :usuario_id AND name = :name");
+
+			$usuario_id = $_SESSION['usuario_id'];
 			$qr1->bindParam(':usuario_id', $usuario_id);
 			$qr1->bindParam(':name', $name);
 			if($qr1->execute()) {
@@ -249,8 +298,10 @@
 				$variavel = 0;
 			}
 		}
-		function update($name, $usuario_id) {
-			$qr1 = $this->conexao->prepare("SELECT * FROM pet where usuario_id = :usuario_id AND name = :name");
+		function update($name) {
+			$qr1 = $this->conexao->prepare("SELECT * FROM pet WHERE usuario_id = :usuario_id AND name = :name");
+
+			$usuario_id = $_SESSION['usuario_id'];
 			$qr1->bindParam(':usuario_id', $usuario_id);
 			$qr1->bindParam(':name', $name);
 			if($qr1->execute()) {
@@ -333,14 +384,14 @@
 				$qr->bindParam(':deltaTime', $horaSalvar);
 				if($qr->execute()) {
 					$json_resposta = json_encode(array(
-						"status" => "true",
+						"status" => true,
 						"name" => $name
 					));
 					return $json_resposta;
 				}
 			}
 			$json_resposta = json_encode(array(
-				"status" => "false",
+				"status" => false,
 				"name" => $name
 			));
 			return $json_resposta;

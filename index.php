@@ -20,6 +20,9 @@
 		.list-group-item:hover {
 			background-color: #CCC;
 		}
+		.list-group-item {
+			margin-bottom: 1px !important;
+		}
 	</style>
 </head>
 <body>
@@ -27,10 +30,15 @@
 <nav class="site-header sticky-top py-1">
 	<div class="container d-flex flex-column flex-md-row justify-content-between">
 		<a class="py-2 d-none d-md-inline-block" href="?action=home">Página inicial</a>
+		<?php if($conta->estaLogado()) { ?>
 		<a class="py-2 d-none d-md-inline-block" href="?action=createPet">Criar pet</a>
 		<a class="py-2 d-none d-md-inline-block" href="?action=selectPet">Selecionar pets</a>
+		<a class="py-2 d-none d-md-inline-block" href="?action=deslogar">Sair</a>
+		<?php } else  { ?>
 		<a class="py-2 d-none d-md-inline-block" href="?action=login">Login</a>
-		<a class="py-2 d-none d-md-inline-block" href="?action=createAccount">Fazer cadastro</a>
+		<a class="py-2 d-none d-md-inline-block" href="?action=cadastrar">Fazer cadastro</a>
+		<?php } ?>
+
 	</div>
 </nav>
 
@@ -38,6 +46,7 @@
 	//Query string "Página inicial" ou "Selecionar pets"
 	if(isset($_GET["action"])){
 	if( ($_GET['action'] == NULL) || ($_GET['action'] == "selectPet") || ($_GET['action'] == "home") ) {
+		$conta->protege();
 ?>
 <div class="container">
 	<div class="row">
@@ -49,6 +58,7 @@
 			</a>
 			<br><br>
 			<ul class="list-group">
+			<?php $resultado = $conexao->listarPets(); ?>
 			<?php foreach ($resultado as $item) { ?>
 				<a href="?action=game&name=<?php echo $item["name"]; ?>">
 					<li class="list-group-item d-flex justify-content-between align-items-center">
@@ -65,7 +75,7 @@
 </div>
 <?php
  } elseif($_GET['action'] == "createPet") {  	?>
-
+<?php $conta->protege(); ?>
 <div class="container">
 	<div class="row">
 		<div class="col-sm-12 pt-2">
@@ -83,14 +93,72 @@
 	</div>
 </div>
 <?php
+ } elseif($_GET['action'] == "login") {  	?>
+<?php $conta->estaLogadoRedir(); ?>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-12 pt-2">
+			<form id="logar" method="POST">
+				<div class="form-group">
+					<label for="usuario">Usuario:</label>
+					<input type="text" class="form-control" name="usuario" id="usuario">
+				</div>
+				<div class="form-group">
+					<label for="senha">Senha:</label>
+					<input type="password" class="form-control" name="senha" id="senha">
+				</div>
+				<div id="createPetMsg" class="alert alert-info" style="display:none;">
+					
+				</div>
+				<button type="submit" class="btn btn-primary">Entrar</button>
+			</form>
+		</div>
+	</div>
+</div>
+<?php
+ } elseif($_GET['action'] == "cadastrar") {  	?>
+
+<?php $conta->estaLogadoRedir(); ?>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-12 pt-2">
+			<form id="cadastrar" method="POST">
+				<div class="form-group">
+					<label for="usuario">Usuario:</label>
+					<input type="text" class="form-control" name="usuario" id="usuario">
+				</div>
+				<div class="form-group">
+					<label for="senha">Senha:</label>
+					<input type="password" class="form-control" name="senha" id="senha">
+				</div>
+				<div class="form-group">
+					<label for="email">E-mail:</label>
+					<input type="email" class="form-control" name="email" id="email">
+				</div>
+				<div id="createPetMsg" class="alert alert-info" style="display:none;">
+					
+				</div>
+				<button type="submit" class="btn btn-primary">Cadastrar</button>
+			</form>
+		</div>
+	</div>
+</div>
+<?php
+ } elseif($_GET['action'] == "deslogar") {  	?>
+
+<?php
+	$conta->deslogar();
+?>
+
+<?php
 	//Query string "game inicial"
  } elseif($_GET['action'] == "game" && $_GET["name"]!=null) {  	?>
 <div class="container" id="petPainel">
 	<div class="row">
 		<?php 
-		$dados = $conexao->getData($_GET["name"],1);
+		$dados = $conexao->getData($_GET["name"]);
 		$dados = json_decode($dados, true);
-		if( !$conexao->petExist($_GET["name"],1)) {
+		if( !$conexao->petExist($_GET["name"])) {
 			echo "Este pet não existe";
 		} elseif($dados["faliceu"]==1) {
 		?>	
@@ -185,7 +253,7 @@
 				nome: nome
 			},
 			success: function(response){
-				var dados = $.parseJSON(response);
+				dados = $.parseJSON(response);
 				var felicidade = dados["happy"] + "%";
 				var fome = dados["hunger"] + "%";
 				var vida = dados["health"] + "%";
@@ -260,33 +328,33 @@
 		$('#higiene').css("width", "100%");
 		<?php if($_GET['action'] == "game") { ?>
 		setInterval(function(){
-			atualizar("<?php echo $_GET["name"]; ?>",1)
+			atualizar("<?php echo $_GET["name"]; ?>")
 		},tempoAtualizacao);
 		setInterval(function(){
-			pegarDados("<?php echo $_GET["name"]; ?>",1)
+			pegarDados("<?php echo $_GET["name"]; ?>")
 		},tempoAtualizacao);
 		if(document.getElementById("nomePet")!=null)
 		{
-			pegarDados("<?php echo $_GET["name"]; ?>",1);
+			pegarDados("<?php echo $_GET["name"]; ?>");
 		}
 
 		<?php } ?>
 	});
 	<?php if($_GET['action'] == "game") { ?>
 	$('#alimentar').on('click', function(e){
-		acao("<?php echo $_GET["name"]; ?>",1,"alimentar");
+		acao("<?php echo $_GET["name"]; ?>", <?php echo $conta->retornaId(); ?>,"alimentar");
 	})
 	$('#limpar').on('click', function(e){
-		acao("<?php echo $_GET["name"]; ?>",1,"limpar");
+		acao("<?php echo $_GET["name"]; ?>", <?php echo $conta->retornaId(); ?>,"limpar");
 	})
 	$('#brincar').on('click', function(e){
-		acao("<?php echo $_GET["name"]; ?>",1,"brincar");
+		acao("<?php echo $_GET["name"]; ?>", <?php echo $conta->retornaId(); ?>,"brincar");
 	})
 	$('#curar').on('click', function(e){
-		acao("<?php echo $_GET["name"]; ?>",1,"curar");
+		acao("<?php echo $_GET["name"]; ?>", <?php echo $conta->retornaId(); ?>,"curar");
 	})
 	$('#luzes').on('click', function(e){
-		acao("<?php echo $_GET["name"]; ?>",1,"luzes");
+		acao("<?php echo $_GET["name"]; ?>", <?php echo $conta->retornaId(); ?>,"luzes");
 	})
 <?php } ?>
 	$('#criarPet').submit( function(e){
@@ -300,7 +368,7 @@
 				nome: $('#nome').val()
 			},
 			success: function(response){
-				var dados = $.parseJSON(response);
+				dados = $.parseJSON(response);
 				if(dados) {
 					if(dados["status"] == true ){
 						$('#createPetMsg').text(dados["name"] + " criado");
@@ -315,6 +383,75 @@
 					}
 				} else {
 					$('#createPetMsg').text("Houve algum problema ao criar, provavelmente já existe um pet com esse nome" + dados["name"]);
+				}
+			},
+			error: function() {
+				$('#createPetMsg').text("Houve algum erro");
+			}
+		})
+	});
+	$('#cadastrar').submit( function(e){
+
+		e.preventDefault();
+		$.ajax({
+			type: "POST",
+			url: "Pet.php",
+			data: {
+				act: "cadastrar",
+				usuario: $('#usuario').val(),
+				senha: $('#senha').val(),
+				email: $('#email').val()
+			},
+			success: function(response){
+				dados = $.parseJSON(response);
+				if(dados) {
+					if(dados["status"] == true ){
+						$('#createPetMsg').text(dados["name"] + " criado");
+						$('#createPetMsg').show("slow");
+						
+						setTimeout(function() {
+						window.location.href = "?action=selectPet";
+						}, 2000);
+					} else {
+						$('#createPetMsg').show("slow");
+						$('#createPetMsg').text("Houve algum erro ao criar a conta, provavelmente esse usuário já existe.");
+					}
+				} else {
+					$('#createPetMsg').text("Houve algum erro ao criar a conta, provavelmente esse usuário já existe: " + dados["name"]);
+				}
+			},
+			error: function() {
+				$('#createPetMsg').text("Houve algum erro");
+			}
+		})
+	});
+	$('#logar').submit( function(e){
+
+		e.preventDefault();
+		$.ajax({
+			type: "POST",
+			url: "Pet.php",
+			data: {
+				act: "login",
+				usuario: $('#usuario').val(),
+				senha: $('#senha').val()
+			},
+			success: function(response){
+				dados = $.parseJSON(response);
+				if(dados) {
+					if(dados["status"] == true ){
+						$('#createPetMsg').text("Entrou");
+						$('#createPetMsg').show("slow");
+						
+						setTimeout(function() {
+						window.location.href = "?action=selectPet";
+						}, 2000);
+					} else {
+						$('#createPetMsg').show("slow");
+						$('#createPetMsg').text("Usuário ou senha incorretos.");
+					}
+				} else {
+					$('#createPetMsg').text("Houve algum erro.");
 				}
 			},
 			error: function() {
