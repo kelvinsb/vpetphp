@@ -48,222 +48,34 @@
 	if( ($_GET['action'] == NULL) || ($_GET['action'] == "selectPet") || ($_GET['action'] == "home") ) {
 		$conta->protege();
 ?>
-<div class="container">
-	<div class="row">
-		<div class="col-sm-12 pt-2">
-			<a href="?action=createPet">
-				<div class="btn btn-primary">
-						Criar pet
-				</div>
-			</a>
-			<br><br>
-			<ul class="list-group">
-			<?php $resultado = $conexao->listarPets(); ?>
-			<?php foreach ($resultado as $item) { ?>
-				
-				<li class="list-group-item d-flex justify-content-between align-items-center row">
-					<a href="?action=game&name=<?php echo $item["name"]; ?>" class="col-sm-10">
-						<?php echo $item["name"]; ?>
-					</a>
-					<a href="?action=deletar&name=<?php echo $item["name"]; ?>">
-						<div class="btn  btn-danger">
-							Deletar
-						</div>
-					</a>
-					<?php if($item["faliceu"] == 1) { ?>
-						<span class="badge badge-danger badge-pill">Morto</span>
-					<?php } ?>
-				</li>
-			<?php } ?>
-			</ul>
-		</div>
-	</div>
-</div>
+<?php include "views/inicial.php"; ?>
+<?php //--------------------------------------------------------- ?>
 <?php
  } elseif($_GET['action'] == "createPet") {  	?>
-<?php $conta->protege(); ?>
-<div class="container">
-	<div class="row">
-		<div class="col-sm-12 pt-2">
-			<form id="criarPet" method="POST">
-				<div class="form-group">
-					<label for="nome">Nome do pet:</label>
-					<input type="text" class="form-control" name="nome" id="nome">
-				</div>
-				<div id="createPetMsg" class="alert alert-info" style="display:none;">
-					
-				</div>
-				<button type="submit" class="btn btn-primary">Criar</button>
-			</form>
-		</div>
-	</div>
-</div>
+<?php include "views/createPet.php"; ?>
+<?php //--------------------------------------------------------- ?>
 <?php
  } elseif($_GET['action'] == "login") {  	?>
-<?php $conta->estaLogadoRedir(); ?>
-<div class="container">
-	<div class="row">
-		<div class="col-sm-12 pt-2">
-			<form id="logar" method="POST">
-				<div class="form-group">
-					<label for="usuario">Usuario:</label>
-					<input type="text" class="form-control" name="usuario" id="usuario">
-				</div>
-				<div class="form-group">
-					<label for="senha">Senha:</label>
-					<input type="password" class="form-control" name="senha" id="senha">
-				</div>
-				<div id="createPetMsg" class="alert alert-info" style="display:none;">
-					
-				</div>
-				<button type="submit" class="btn btn-primary">Entrar</button>
-			</form>
-		</div>
-	</div>
-</div>
+<?php include "views/login.php"; ?>
+<?php //--------------------------------------------------------- ?>
 <?php
  } elseif($_GET['action'] == "cadastrar") {  	?>
-
-<?php $conta->estaLogadoRedir(); ?>
-<div class="container">
-	<div class="row">
-		<div class="col-sm-12 pt-2">
-			<form id="cadastrar" method="POST">
-				<div class="form-group">
-					<label for="usuario">Usuario:</label>
-					<input type="text" class="form-control" name="usuario" id="usuario">
-				</div>
-				<div class="form-group">
-					<label for="senha">Senha:</label>
-					<input type="password" class="form-control" name="senha" id="senha">
-				</div>
-				<div class="form-group">
-					<label for="email">E-mail:</label>
-					<input type="email" class="form-control" name="email" id="email">
-				</div>
-				<div id="createPetMsg" class="alert alert-info" style="display:none;">
-					
-				</div>
-				<button type="submit" class="btn btn-primary">Cadastrar</button>
-			</form>
-		</div>
-	</div>
-</div>
+<?php include "views/cadastrar.php"; ?>
+<?php //--------------------------------------------------------- ?>
 <?php
  } elseif($_GET['action'] == "deslogar") {  	?>
-
-<?php
-	$conta->deslogar();
-?>
+<?php include "views/deslogar.php"; ?>
+<?php //--------------------------------------------------------- ?>
 <?php
  } elseif($_GET['action'] == "deletar" && $_GET["name"]!=null) {  	?>
-
-<?php
-	$deletar = $conexao->deletarPet(trim($_GET["name"]));
-	if ($deletar) {
-		header('Location: ?action=selectPet');
-	} else {
-		echo "Houve algum erro";
-	}
-?>
+<?php include "views/deletarPet.php"; ?>
+<?php //--------------------------------------------------------- ?>
 
 <?php
 	//Query string "game inicial"
  } elseif($_GET['action'] == "game" && $_GET["name"]!=null) {  	?>
-<div class="container" id="petPainel">
-	<div class="row">
-		<?php 
-		$dados = $conexao->getData($_GET["name"]);
-		$dados = json_decode($dados, true);
-		if( !$conexao->petExist($_GET["name"])) {
-			echo "Este pet não existe";
-		} elseif($dados["faliceu"]==1) {
-		?>	
-		<strong><?php echo $dados["name"]; ?> está morto</strong>
-		<?php } else { ?>
-		<div class="col-sm-12 row border mb-1">
-			<div class="col-sm-2 mb-2">
-				Felicidade
-				<div class="progress">
-					<div class="progress-bar bg-warning" role="progress-bar" style="width: <?php echo $dados["happy"]; ?>%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" id="felicidade"></div>
-				</div>
-				<div class="justify-content-between align-items-center text-center" id="feli"><?php echo $dados["happy"]; ?>%</div>
-			</div>
-			<div class="col-sm-2">
-				Fome
-				<div class="progress">
-					<div class="progress-bar bg-success" role="progress-bar" style="width: <?php echo $dados["hunger"]; ?>%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" id="fome"></div>
-				</div>
-				<div class="justify-content-between align-items-center text-center" id="fom"><?php echo $dados["hunger"]; ?>%</div>
-			</div>
-			<div class="col-sm-2">
-				Vida
-				<div class="progress">
-					<div class="progress-bar bg-danger" role="progress-bar" style="width: <?php echo $dados["health"]; ?>%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" id="vida"></div>
-				</div>
-				<div class="justify-content-between align-items-center text-center" id="vid"><?php echo $dados["health"]; ?>%</div>
-			</div>
-			<div class="col-sm-2">
-				Sujeira
-				<div class="progress">
-					<div class="progress-bar bg-info" role="progress-bar" style="width: <?php echo $dados["dirty"]; ?>%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" id="higiene"></div>
-				</div>
-				<div class="justify-content-between align-items-center text-center" id="higi"><?php echo $dados["dirty"]; ?>%</div>
-			</div>
-			<div class="col-sm-2 text-center">
-				Cansaço
-				<div class="progress">
-					<div class="progress-bar bg-info" role="progress-bar" style="width: <?php echo $dados["tired"]; ?>%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" id="cansaco"></div>
-				</div>
-				<div class="justify-content-between align-items-center text-center" id="cansa"><?php echo $dados["tired"]; ?>%</div>
-			</div>
-			<div class="col-sm-2"><strong>Nome do pet:</strong> <span id="nomePet"><?php echo $dados["name"]; ?></span>
-			</div>
-
-			<!--<div class="col-sm-2 text-center">
-				<div class="dropdown">
-					<button class="btn btn-secondary dropdown-toggle" type="button">
-						Opções
-					</button>
-				</div>
-				-->
-			</div>
-		</div>
-		<div class="col-sm-12 row border mb-1">
-			<img src="algumaImagemDePet" class="img-responsive mx-auto d-block" style="max-height: 400px" id="ibagem">
-		</div>
-		<div class="col-sm-12 row text-center">
-			<div class="col-sm-1"></div>
-			<div class="col-sm-2">
-				<div class="btn btn-primary" id="alimentar">
-					Alimentar
-				</div>
-			</div>
-			<div class="col-sm-2">
-				<div class="btn btn-primary limpar" id="limpar">
-					Lavar
-				</div>
-			</div>
-			<div class="col-sm-2">
-				<div class="btn btn-primary brincar" id="brincar">
-					Brincar
-				</div>
-			</div>
-			<div class="col-sm-2">
-				<div class="btn btn-primary" id="curar">
-					Curar
-				</div>
-			</div>
-			<div class="col-sm-2">
-				<div class="btn btn-primary lights" id="luzes">
-					Desligar luzes
-				</div>
-			</div>
-			<div class="col-sm-1"></div>
-		</div>
-	<?php } ?>
-	</div>
-</div>
+<?php include "views/game.php"; ?>
+<?php //--------------------------------------------------------- ?>
 <?php  } }?>
 
 </body>
