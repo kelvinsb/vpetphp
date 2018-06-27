@@ -76,11 +76,16 @@
  } elseif($_GET['action'] == "game" && $_GET["name"]!=null) {  	?>
 <?php include "views/game.php"; ?>
 <?php //--------------------------------------------------------- ?>
+<?php
+ } elseif($_GET['action'] == "play" && $_GET["game"] == "memoria" && $_GET["name"] != null) {  	?>
+<?php include "views/gameMemoria.php"; ?>
+<?php //--------------------------------------------------------- ?>
 <?php  } }?>
 
 </body>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script type="text/javascript">
+	<?php if(($_GET['action'] == "game" && $_GET["name"]!=null) || ($_GET['action'] == "play" && $_GET["game"] == "memoria" && $_GET["name"] != null)) { ?>
 	function pegarDados(nome, user_id)
 	{
 		$.ajax({
@@ -163,9 +168,34 @@
 		})
 		pegarDados(nome,user_id);
 	}
+	function jogar(nome, user_id, pontos)
+	{
+		console.log(nome);
+		console.log(user_id);
+		console.log(pontos);
+		$.ajax({
+			type: "POST",
+			url: "Pet.php",
+			data: {
+				act: "jogar",
+				pontos: pontos,
+				nome: nome
+			},
+			success: function(response){
+				setTimeout(function() {
+					window.location.href = "?action=game&name=" + nome;
+					}, 5000);
+			},
+			error: function() {
+				//$('#createPetMsg').text("Houve algum erro");
+			}
+		})
+		pegarDados(nome,user_id);
+	}
 	$(document).ready(function() {
 		<?php $tempoAtu = Conexao::$tempoExec * 1000; ?>
 		var tempoAtualizacao = (<?php echo $tempoAtu; ?>);
+		atualizar("<?php echo $_GET["name"]; ?>")
 		$('#felicidade').css("width", "100%");
 		$('#fome').css("width", "100%");
 		$('#vida').css("width", "100%");
@@ -184,15 +214,13 @@
 
 		<?php } ?>
 	});
+	<?php } ?>
 	<?php if($_GET['action'] == "game") { ?>
 	$('#alimentar').on('click', function(e){
 		acao("<?php echo $_GET["name"]; ?>", <?php echo $conta->retornaId(); ?>,"alimentar");
 	})
 	$('#limpar').on('click', function(e){
 		acao("<?php echo $_GET["name"]; ?>", <?php echo $conta->retornaId(); ?>,"limpar");
-	})
-	$('#brincar').on('click', function(e){
-		acao("<?php echo $_GET["name"]; ?>", <?php echo $conta->retornaId(); ?>,"brincar");
 	})
 	$('#curar').on('click', function(e){
 		acao("<?php echo $_GET["name"]; ?>", <?php echo $conta->retornaId(); ?>,"curar");
@@ -303,7 +331,64 @@
 			}
 		})
 	});
-
+	<?php
+ 		if($_GET['action'] == "play" && $_GET["game"] == "memoria" && $_GET["name"] != null) {  	?>
+	var vezes = 0;
+	$('.overflow').each(function(){
+		$(this).hide('fast');
+	});
+	setTimeout(function() {
+		$('.overflow').each(function(){
+			$(this).show('fast');
+		});
+	}, 2000);
+	var pos1B;
+	var pos1E;
+	var pos2B;
+	var pos2E;
+	var posicoes = 0;
+	let erros = 0;
+	$('#mensagem').hide();
+	$('#faltam').text((posicoesMax/2)-(posicoes/2));
+	$('.pt-2.row').on('click','.overflow', function(){
+		$(this).hide('fast');
+		vezes++;
+		console.log("vezes : " + vezes);
+		if(vezes==1) {
+			pos1E = $(this);
+			pos1B = pos1E.parent().css("background-color");
+		}  else if (vezes==2) {
+			console.log("entrou");
+			pos2E = $(this);
+			pos2B = pos2E.parent().css("background-color");
+			if(pos1B == pos2B) {
+				console.log("entrou 2");
+				console.log(pos1B);
+				console.log(pos2B);
+				pos1E.addClass("over-forever");
+				pos2E.addClass("over-forever");
+				posicoes+=2;
+				$('#faltam').text((posicoesMax/2)-(posicoes/2));
+				vezes=0;
+			}
+		} else {
+			$('.overflow').each(function(){
+				if(!($(this).hasClass("over-forever"))) {
+					$(this).show('fast');
+				}
+				
+			});
+			vezes=0;
+			erros++;
+			$('#erros').text(erros);
+		};
+		if(posicoes==posicoesMax) {
+			$('#mensagem').show("slow");
+			$('#mensagem').text("Parabéns!");
+			jogar("<?php echo $_GET["name"]; ?>", <?php echo $conta->retornaId(); ?>, erros);
+		}
+	});
+	<?php } ?>
 </script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
 </html>

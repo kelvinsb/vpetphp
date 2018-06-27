@@ -6,5 +6,5 @@
 
 	define('GAMENAME', 'VPet');
 	//Tempo de atualização em segundos
-	define('TEMPOEXEC', 2);
+	define('TEMPOEXEC', 10);
 ?>

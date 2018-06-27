@@ -1,3 +1,6 @@
+<?php
+$conta->protege();
+?>
 <div class="container" id="petPainel">
 	<div class="row">
 		<?php 
@@ -62,27 +65,29 @@
 		</div>
 		<div class="col-sm-12 row text-center">
 			<div class="col-sm-1"></div>
-			<div class="col-sm-2">
+			<div class="col-sm-2 mb-1">
 				<div class="btn btn-primary" id="alimentar">
 					Alimentar
 				</div>
 			</div>
-			<div class="col-sm-2">
+			<div class="col-sm-2 mb-1">
 				<div class="btn btn-primary limpar" id="limpar">
 					Lavar
 				</div>
 			</div>
-			<div class="col-sm-2">
-				<div class="btn btn-primary brincar" id="brincar">
-					Brincar
-				</div>
+			<div class="col-sm-2 mb-1">
+				<a href="?action=play&game=memoria&name=<?php echo $_GET["name"]; ?>">
+					<div class="btn btn-primary brincar" id="brincar">
+						Brincar
+					</div>
+				</a>
 			</div>
-			<div class="col-sm-2">
+			<div class="col-sm-2 mb-1">
 				<div class="btn btn-primary" id="curar">
 					Curar
 				</div>
 			</div>
-			<div class="col-sm-2">
+			<div class="col-sm-2 mb-1">
 				<div class="btn btn-primary lights" id="luzes">
 					Desligar luzes
 				</div>

@@ -53,7 +53,7 @@
 				return;
 			}
 			elseif($_POST["act"]==="criar") {
-				$criado = $conexao->CriarPet($_POST["nome"], 1);
+				$criado = $conexao->CriarPet($_POST["nome"]);
 				if($criado==true || $criado ==false) {
 					$resposta = array(
 						"status" => $criado,
@@ -64,46 +64,60 @@
 				}
 			}
 			elseif ($_POST["act"]==="pegardados") {
-				$dados = $conexao->getData($_POST["nome"], 1);
+				$dados = $conexao->getData($_POST["nome"]);
 				if($dados) {
 					echo $dados;
 				}
 			}
 			elseif ($_POST["act"]==="atualizar") {
-				$dados = $conexao->update($_POST["nome"], 1);
+				$dados = $conexao->update($_POST["nome"]);
 				if($dados) {
 					echo $dados;
 				}
 			}
 			elseif ($_POST["act"]==="alimentar") {
-				$dados = $conexao->feed($_POST["nome"], 1, 1);
+				$dados = $conexao->feed($_POST["nome"], 1);
 				if($dados) {
 					echo $dados;
 				}
 			}
 			elseif ($_POST["act"]==="limpar") {
-				$dados = $conexao->flush($_POST["nome"], 1);
-				if($dados) {
-					echo $dados;
-				}
-			}
-			elseif ($_POST["act"]==="brincar") {
-				$dados = $conexao->play($_POST["nome"], 1, 10);
+				$dados = $conexao->flush($_POST["nome"]);
 				if($dados) {
 					echo $dados;
 				}
 			}
 			elseif ($_POST["act"]==="curar") {
-				$dados = $conexao->cure($_POST["nome"], 1);
+				$dados = $conexao->cure($_POST["nome"]);
 				if($dados) {
 					echo $dados;
 				}
 			}
 			elseif ($_POST["act"]==="luzes") {
-				$dados = $conexao->lights($_POST["nome"], 1);
+				$dados = $conexao->lights($_POST["nome"]);
 				if($dados) {
 					echo $dados;
 				}
+			}
+			elseif ($_POST["act"]==="jogar") {
+				$pontos = 100 - ($_POST["pontos"] * 5);
+				$dados = $conexao->play($_POST["nome"], $pontos);
+				if($dados) {
+					$resposta = array(
+						"status" => true,
+						"name" => $_POST["nome"],
+						"pontos" => $_POST["pontos"]
+					);
+					$json_resposta = json_encode($resposta);
+					echo $json_resposta;
+					return;
+				}
+				$resposta = array(
+					"status" => false,
+				);
+				$json_resposta = json_encode($resposta);
+				echo $json_resposta;
+				return;
 			}
 			
 		}

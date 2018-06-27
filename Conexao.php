@@ -322,7 +322,10 @@
 			$usuario_id = $_SESSION['usuario_id'];
 			$qr1->bindParam(':usuario_id', $usuario_id);
 			$qr1->bindParam(':name', $name);
-			if($qr1->execute()) {
+			$qr1->fetchAll(PDO::FETCH_ASSOC);
+			
+			$qr1->execute();
+			if($qr1->rowCount() > 0) {
 				$resultado = $qr1->fetch(PDO::FETCH_ASSOC);
 				if($resultado["sad"] == 1) {
 					$taxaFelicidade = 2;
