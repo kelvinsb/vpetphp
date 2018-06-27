@@ -6,7 +6,7 @@
 		private $user = DBUSER;
 		private $pw = DBPW;
 		private $dbname = DBNAME;
-		static $tempoExec = 2;//tempo de atualização do código em segundos
+		static $tempoExec = TEMPOEXEC;//tempo de atualização do código em segundos
 
 		private $conexao;
 		public function __construct() {
@@ -119,6 +119,24 @@
 			
 		
 			return false;
+		}
+		function deletarPet($name) {
+			$verificar = self::verSeTem($name);
+			$usuario_id = $_SESSION['usuario_id'];
+
+			if($verificar==0)
+			{
+				return false;
+			}
+			echo "foi";
+			$qr = $this->conexao->prepare("DELETE FROM pet WHERE name = :nome AND usuario_id = :usuario_id");
+			$qr->bindParam(':nome', $name);
+			$qr->bindParam(':usuario_id', $usuario_id);
+			if($qr->execute()) {
+				return true;
+			}
+			return false;
+
 		}
 		function feed($name, $amount) {
 			$qr1 = $this->conexao->prepare("SELECT hunger,sick FROM pet WHERE usuario_id =:usuario_id AND name = :name");
@@ -345,6 +363,8 @@
 						{
 							$resultado["tired"]=0;
 						}
+					} else {
+						$resultado["tired"]+=1;
 					}
 					self::teto($resultado["happy"]);
 					self::chao($resultado["happy"]);

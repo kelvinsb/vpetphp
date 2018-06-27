@@ -60,14 +60,20 @@
 			<ul class="list-group">
 			<?php $resultado = $conexao->listarPets(); ?>
 			<?php foreach ($resultado as $item) { ?>
-				<a href="?action=game&name=<?php echo $item["name"]; ?>">
-					<li class="list-group-item d-flex justify-content-between align-items-center">
+				
+				<li class="list-group-item d-flex justify-content-between align-items-center row">
+					<a href="?action=game&name=<?php echo $item["name"]; ?>" class="col-sm-10">
 						<?php echo $item["name"]; ?>
-						<?php if($item["faliceu"] == 1) { ?>
-							<span class="badge badge-danger badge-pill">Morto</span>
-						<?php } ?>
-					</li>
-				</a>
+					</a>
+					<a href="?action=deletar&name=<?php echo $item["name"]; ?>">
+						<div class="btn  btn-danger">
+							Deletar
+						</div>
+					</a>
+					<?php if($item["faliceu"] == 1) { ?>
+						<span class="badge badge-danger badge-pill">Morto</span>
+					<?php } ?>
+				</li>
 			<?php } ?>
 			</ul>
 		</div>
@@ -149,6 +155,17 @@
 <?php
 	$conta->deslogar();
 ?>
+<?php
+ } elseif($_GET['action'] == "deletar" && $_GET["name"]!=null) {  	?>
+
+<?php
+	$deletar = $conexao->deletarPet(trim($_GET["name"]));
+	if ($deletar) {
+		header('Location: ?action=selectPet');
+	} else {
+		echo "Houve algum erro";
+	}
+?>
 
 <?php
 	//Query string "game inicial"
@@ -193,7 +210,16 @@
 				</div>
 				<div class="justify-content-between align-items-center text-center" id="higi"><?php echo $dados["dirty"]; ?>%</div>
 			</div>
-			<div class="col-sm-2"><strong>Nome do pet:</strong> <span id="nomePet"><?php echo $dados["name"]; ?></span></div>
+			<div class="col-sm-2 text-center">
+				Cansaço
+				<div class="progress">
+					<div class="progress-bar bg-info" role="progress-bar" style="width: <?php echo $dados["tired"]; ?>%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" id="cansaco"></div>
+				</div>
+				<div class="justify-content-between align-items-center text-center" id="cansa"><?php echo $dados["tired"]; ?>%</div>
+			</div>
+			<div class="col-sm-2"><strong>Nome do pet:</strong> <span id="nomePet"><?php echo $dados["name"]; ?></span>
+			</div>
+
 			<!--<div class="col-sm-2 text-center">
 				<div class="dropdown">
 					<button class="btn btn-secondary dropdown-toggle" type="button">
@@ -259,8 +285,12 @@
 				var vida = dados["health"] + "%";
 				var higiene = dados["dirty"] + "%";
 				var morto = dados["faliceu"];
+				var cansaco = dados["tired"] + "%";
 				if(morto==1) {
 					$('#petPainel').replaceWith("<div class=\"container\" id=\"petPainel\"><strong>" + dados["name"] + " está morto</strong></div>")
+					setTimeout(function() {
+						window.location.href = "?action=selectPet";
+						}, 5000);
 				}
 				$('#felicidade').css("width", felicidade);
 				$('#feli').text(felicidade);
@@ -270,6 +300,8 @@
 				$('#vid').text(vida);
 				$('#fome').css("width", fome);
 				$('#fom').text(fome);
+				$('#cansaco').css("width", cansaco);
+				$('#cansa').text(cansaco);
 				$('#nomePet').text(dados["name"]);
 				if(dados["lights"]==0) {
 					$('body').css("background-color", "#000000");
