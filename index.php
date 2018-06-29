@@ -4,7 +4,8 @@
 	<meta charset="utf-8"><?php
 	include "Pet.php"; ?> 
 	<title><?php echo GAMENAME; ?></title>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+	<link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+	<link href="css/pet.css" rel="stylesheet">
 	<style type="text/css">
 		.site-header {
 		  background-color: #000000;
@@ -33,6 +34,7 @@
 		<?php if($conta->estaLogado()) { ?>
 		<a class="py-2 d-none d-md-inline-block" href="?action=createPet">Criar pet</a>
 		<a class="py-2 d-none d-md-inline-block" href="?action=selectPet">Selecionar pets</a>
+		<a class="py-2 d-none d-md-inline-block" href="?action=ranking">Ranking</a>
 		<a class="py-2 d-none d-md-inline-block" href="?action=deslogar">Sair</a>
 		<?php } else  { ?>
 		<a class="py-2 d-none d-md-inline-block" href="?action=login">Login</a>
@@ -67,6 +69,10 @@
 <?php include "views/deslogar.php"; ?>
 <?php //--------------------------------------------------------- ?>
 <?php
+ } elseif($_GET['action'] == "ranking") {  	?>
+<?php include "views/ranking.php"; ?>
+<?php //--------------------------------------------------------- ?>
+<?php
  } elseif($_GET['action'] == "deletar" && $_GET["name"]!=null) {  	?>
 <?php include "views/deletarPet.php"; ?>
 <?php //--------------------------------------------------------- ?>
@@ -83,7 +89,8 @@
 <?php  } }?>
 
 </body>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="js/jquery-3.3.1.min.js"></script>
+<script src="js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
 <script type="text/javascript">
 	<?php if(($_GET['action'] == "game" && $_GET["name"]!=null) || ($_GET['action'] == "play" && $_GET["game"] == "memoria" && $_GET["name"] != null)) { ?>
 	function pegarDados(nome, user_id)
@@ -127,6 +134,38 @@
 					$('body').css("background-color", "#FFFFFF")
 					$('body').css("color", "#000000");
 				}
+				
+				classe = "hyper";
+				fundo = "yellow";
+
+				if(dados["tired"] > 50 ) {
+					classe = "sleepy";
+					fundo = "grey";
+				}
+				if(dados["dirty"] > 50 ) {
+					classe = "";
+					fundo = "brown";
+				}
+				if(dados["sad"] == 1) {
+					classe = "sad";
+					fundo = "blue";
+				}
+				if(dados["sick"] == 1) {
+					classe = "nervous";
+					fundo = "limegreen";
+				}
+				if(dados["sleeping"] == 1 && dados["lights"] == 0) {
+					classe = "sleepy";
+					fundo = "darkgrey";
+				}
+				if(classe ==  "") {
+					classe = "item creature-box mod-hyper";
+				} else {
+					classe = "item creature-box mod-" + classe;
+				}
+				fundo = "background-color: " + fundo + "; animation-duration: 4.99s; animation-delay: -5.48s;";
+				$('#creature_0').attr("class", classe);
+				$('.creature').attr("style", fundo);
 			},
 			error: function() {
 				$('#createPetMsg').text("Houve algum erro");
@@ -390,5 +429,4 @@
 	});
 	<?php } ?>
 </script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
 </html>

@@ -9,9 +9,43 @@ $conta->protege();
 		if( !$conexao->petExist($_GET["name"])) {
 			echo "Este pet não existe";
 		} elseif($dados["faliceu"]==1) {
-		?>	
+		?>
 		<strong><?php echo $dados["name"]; ?> está morto</strong>
 		<?php } else { ?>
+		<?php
+			$tired = $dados["tired"]; //0-100
+			$dirty = $dados["dirty"]; //0-100
+			$sad = $dados["sad"];
+			$sick = $dados["sick"];
+			$sleeping = $dados["sleeping"];
+			$lights = $dados["lights"];
+
+			$classe = "hyper";
+			$fundo = "yellow";
+
+			if($tired > 50 ) {
+				$classe = "sleepy";
+				$fundo = "grey";
+			}
+			if($dirty > 50 ) {
+				$classe = "";
+				$fundo = "brown";
+			}
+			if($sad == 1) {
+				$classe = "sad";
+				$fundo = "blue";
+			}
+			if($sick == 1) {
+				$classe = "nervous";
+				$fundo = "limegreen";
+			}
+			if($sleeping == 1 && $lights == 0) {
+				$classe = "sleepy";
+				$fundo = "darkgrey";
+			}
+			$classe = "item creature-box mod-" . $classe;
+			$fundo = "background-color: " . $fundo . ";";
+		?>	
 		<div class="col-sm-12 row border mb-1">
 			<div class="col-sm-2 mb-2">
 				Felicidade
@@ -61,7 +95,17 @@ $conta->protege();
 			</div>
 		</div>
 		<div class="col-sm-12 row border mb-1">
-			<img src="algumaImagemDePet" class="img-responsive mx-auto d-block" style="max-height: 400px" id="ibagem">
+			<div id="creature_0" class="<?php echo $classe; ?>" style="margin: 0 auto;">
+				<div class="creature" style="<?php echo $fundo; ?> animation-duration: 4.99s; animation-delay: -5.48s">
+					<div class="face" style="animation-duration: 6.07s; animation-delay: -6.14s">
+						<div class="eyes">
+							<div class="eye" style="animation-duration: 6.55s; animation-delay: -5.34s"></div>
+							<div class="eye" style="animation-duration: 6.55s; animation-delay: -5.34s"></div>
+						</div>
+						<div class="mouth"></div>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="col-sm-12 row text-center">
 			<div class="col-sm-1"></div>
@@ -93,6 +137,15 @@ $conta->protege();
 				</div>
 			</div>
 			<div class="col-sm-1"></div>
+		</div>
+		<div class="col-sm-12 bg-warning p-3 mt-1">
+			<h2>Instruções</h2>
+			<strong>Felicidade: </strong>quanto maior é melhor. <br>
+			<strong>Fome: </strong>quanto menor é melhor. <br>
+			<strong>Vida: </strong>quanto maior é melhor. <br>
+			<strong>Sujeira: </strong>quanto menor é melhor. <br>
+			<strong>Cansaço: </strong>quanto menor é melhor. <br><br>
+			<strong class="text-danger">Cuidado: </strong> o seu pet vai morrer se Felicidade = 0%, ou Fome = 100%,ou Vida = 0%, ou Sujeira = 100%.
 		</div>
 	<?php } ?>
 	</div>

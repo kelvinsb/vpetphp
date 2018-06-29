@@ -36,6 +36,14 @@
 			}
 			return false;
 		}
+		function listarPetsOrdenado() {
+			$qr = $this->conexao->prepare("SELECT * FROM pet ORDER BY pontos");
+			if($qr->execute()) {
+				$resultado = $qr->fetchAll(PDO::FETCH_ASSOC);
+				return $resultado;
+			}
+			return false;
+		}
 		function cadastrarUsuario($usuario, $senha, $email) {
 			$qr1 = $this->conexao->prepare("SELECT usuario FROM usuario WHERE usuario = :usuario ");
 			$qr1->bindParam(':usuario', $usuario);
@@ -87,7 +95,7 @@
 			{
 				return false;
 			}
-			$qr = $this->conexao->prepare("INSERT INTO pet(name,happy,hunger,health,sick,tired,dirty,sad,sleeping,faliceu,usuario_id, deltaTime, lights) VALUES(:name, :happy, :hunger, :health, :sick, :tired, :dirty, :sad, :sleeping, :faliceu, :usuario_id, :deltaTime, :lights);");
+			$qr = $this->conexao->prepare("INSERT INTO pet(name,happy,hunger,health,sick,tired,dirty,sad,sleeping,faliceu,usuario_id, deltaTime, lights, pontos) VALUES(:name, :happy, :hunger, :health, :sick, :tired, :dirty, :sad, :sleeping, :faliceu, :usuario_id, :deltaTime, :lights, :pontos);");
 			$happy = 100;
 			$hunger = 0;
 			$health = 100;
@@ -98,7 +106,8 @@
 			$sleeping = 0;
 			$faliceu = 0;
 			$deltaTime = date('Y-m-d H:i:s');
-			$lights = 0;
+			$lights = 1;
+			$pontos = 0;
 			$qr->bindParam(':name', $name);
 			$qr->bindParam(':happy', $happy);
 			$qr->bindParam(':hunger', $hunger);
@@ -112,6 +121,7 @@
 			$qr->bindParam(':usuario_id', $usuario_id);
 			$qr->bindParam(':deltaTime', $deltaTime);
 			$qr->bindParam(':lights', $lights);
+			$qr->bindParam(':pontos', $pontos);
 			if($qr->execute())
 			{
 				return true;
@@ -139,7 +149,7 @@
 
 		}
 		function feed($name, $amount) {
-			$qr1 = $this->conexao->prepare("SELECT hunger,sick FROM pet WHERE usuario_id =:usuario_id AND name = :name");
+			$qr1 = $this->conexao->prepare("SELECT hunger,sick, health FROM pet WHERE usuario_id =:usuario_id AND name = :name");
 
 			$usuario_id = $_SESSION['usuario_id'];
 			$qr1->bindParam(':usuario_id', $usuario_id);
@@ -147,18 +157,21 @@
 			if($qr1->execute()) {
 				$resultado = $qr1->fetch(PDO::FETCH_ASSOC);
 				$hunger = $resultado["hunger"];
+				$life = $resultado["health"];
 				//echo $hunger . "\n";
 				$hunger-=$amount;
+				$life+=$amount;
 				$sick = $resultado["sick"];
 				if($hunger<0) {
 					$hunger=0;
 					$sick = 1;
 				}
-				$qr = $this->conexao->prepare("UPDATE pet SET hunger = :hunger, sick = :sick WHERE usuario_id = :usuario_id AND name = :name");
+				$qr = $this->conexao->prepare("UPDATE pet SET hunger = :hunger, sick = :sick, health = :health WHERE usuario_id = :usuario_id AND name = :name");
 				$qr->bindParam(':usuario_id', $usuario_id);
 				$qr->bindParam(':name', $name);
 				$qr->bindParam(':hunger', $hunger);
 				$qr->bindParam(':sick', $sick);
+				$qr->bindParam(':health', $life);
 				if($qr->execute()) {
 					return true;
 				}
@@ -191,7 +204,7 @@
 			return false;
 		}
 		function play($name, $pontos) {
-			$qr1 = $this->conexao->prepare("SELECT happy, hunger FROM pet WHERE usuario_id = :usuario_id AND name = :name");
+			$qr1 = $this->conexao->prepare("SELECT happy, hunger, pontos FROM pet WHERE usuario_id = :usuario_id AND name = :name");
 			$usuario_id = $_SESSION['usuario_id'];
 			$qr1->bindParam(':usuario_id', $usuario_id);
 			$qr1->bindParam(':name', $name);
@@ -206,11 +219,13 @@
 					}
 				}
 				$hunger+=1;
-				$qr = $this->conexao->prepare("UPDATE pet SET happy = :happy, hunger = :hunger WHERE usuario_id = :usuario_id AND name = :name");
+				$qr = $this->conexao->prepare("UPDATE pet SET happy = :happy, hunger = :hunger, pontos = :pontos WHERE usuario_id = :usuario_id AND name = :name");
 				$qr->bindParam(':usuario_id', $usuario_id);
 				$qr->bindParam(':name', $name);
 				$qr->bindParam(':happy', $happy);
 				$qr->bindParam(':hunger', $hunger);
+				$pontos+= $resultado["pontos"];
+				$qr->bindParam(':pontos', $pontos);
 				if($qr->execute()) {
 					return true;
 				}
@@ -262,15 +277,19 @@
 			if($qr1->execute()) {
 				$resultado = $qr1->fetch(PDO::FETCH_ASSOC);
 				$lights = $resultado["lights"];
+				$sleeping = $resultado["sleeping"];
 				if($lights == 1) {
 					$lights = 0;
+					$sleeping = 1;
 				} else {
 					$lights = 1;
+					$sleeping = 0;
 				}
-				$qr = $this->conexao->prepare("UPDATE pet SET lights = :lights WHERE usuario_id = :usuario_id AND name = :name");
+				$qr = $this->conexao->prepare("UPDATE pet SET lights = :lights,sleeping = :sleeping WHERE usuario_id = :usuario_id AND name = :name");
 				$qr->bindParam(':usuario_id', $usuario_id);
 				$qr->bindParam(':name', $name);
 				$qr->bindParam(':lights', $lights);
+				$qr->bindParam(':sleeping', $sleeping);
 				if($qr->execute()) {
 					return True;
 				}

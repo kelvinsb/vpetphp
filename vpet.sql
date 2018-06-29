@@ -10,6 +10,14 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 CREATE DATABASE vpet;
 USE vpet;
 
+CREATE TABLE `usuario` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `usuario` varchar(45) DEFAULT NULL,
+  `senha` varchar(255) DEFAULT NULL,
+  `email` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `pet` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) DEFAULT NULL,
@@ -25,6 +33,7 @@ CREATE TABLE `pet` (
   `usuario_id` int(11) NOT NULL,
   `deltaTime` datetime(1) DEFAULT NULL,
   `lights` tinyint(1) DEFAULT NULL,
+  `pontos` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_pet_usuario1_idx` (`usuario_id` ASC),
   CONSTRAINT `fk_pet_usuario1`
@@ -34,10 +43,4 @@ CREATE TABLE `pet` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `usuario` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `usuario` varchar(45) DEFAULT NULL,
-  `senha` varchar(255) DEFAULT NULL,
-  `email` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
+

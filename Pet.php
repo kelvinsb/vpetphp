@@ -100,7 +100,7 @@
 				}
 			}
 			elseif ($_POST["act"]==="jogar") {
-				$pontos = 100 - ($_POST["pontos"] * 5);
+				$pontos = 100 - ($_POST["pontos"] * 2);
 				$dados = $conexao->play($_POST["nome"], $pontos);
 				if($dados) {
 					$resposta = array(
