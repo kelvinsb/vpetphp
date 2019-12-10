@@ -8,10 +8,16 @@
 		var $pets;
 
 		function protege() {
-			if(!isset($_SESSION['usuario_id']) || !isset($_SESSION['logado_em'])){
-				header('Location: ?action=login');
+			if(!isset($_SESSION['usuario_id']) || !isset($_SESSION['logado_em'])): ?>
+				<div class="container">
+					<div class="row">
+						<div class="col-sm-12 text-center">Area restrita</div>
+					</div>
+				</div>
+		<?php endif ?>
+		<?php 
+				// header('Location: ?action=login');
 			}
-		}
 		function estaLogado() {
 			if(isset($_SESSION['usuario_id']) || isset($_SESSION['logado_em'])){
 				return true;

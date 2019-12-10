@@ -1,7 +1,7 @@
 <?php
-	define('DBHOST', 'localhost');
+	define('DBHOST', 'mysqldb');
 	define('DBUSER', 'root');
-	define('DBPW', 'qwe123456');
+	define('DBPW', '123456');
 	define('DBNAME', 'vpet');
 
 	define('GAMENAME', 'VPet');

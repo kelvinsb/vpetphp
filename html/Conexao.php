@@ -15,11 +15,11 @@
 				$db = $this->dbname;
 				$this->conexao = new PDO("mysql:host=$host;dbname=$db", $this->user, $this->pw);
 				$this->conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-   				$this->conexao->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-				//echo "Conectado\n";
+				   $this->conexao->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+				// echo "Conectado\n";
 			}
 			catch(PDOException $e) {
-				//echo "Conexão falhou\n";
+				// echo "Conexão falhou\n";
 			}
 		}
 		function fecharConexao() {
@@ -138,7 +138,7 @@
 			{
 				return false;
 			}
-			echo "foi";
+			echo "Pet deletado";
 			$qr = $this->conexao->prepare("DELETE FROM pet WHERE name = :nome AND usuario_id = :usuario_id");
 			$qr->bindParam(':nome', $name);
 			$qr->bindParam(':usuario_id', $usuario_id);

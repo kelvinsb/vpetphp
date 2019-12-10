@@ -1,0 +1,41 @@
+version: '3'
+services:
+  phpserver:
+    build:
+      context: .
+      dockerfile: Dockerfile-php-pdo
+    volumes:
+      - ./html:/var/www/html
+    ports:
+      - '8080:80'
+    depends_on:
+      - mysqldb
+    links:
+      - mysqldb
+    
+  # apache:
+  #   image: 'php:7.2-apache'
+  #   container_name: php
+  #   restart: always
+  #   ports:
+  #     - '8080:80'
+  #   volumes:
+  #     - ./html:/var/www/html
+  #   depends_on:
+  #     - mysqldb
+  #   links:
+  #     - mysqldb
+  
+  mysqldb:
+    image: mysql:5.7
+    restart: always
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./mysql-dump:/docker-entrypoint-initdb.d
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=vpet
+volumes:
+  db_data:

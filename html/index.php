@@ -1,8 +1,9 @@
+<?php
+	include "Pet.php"; ?> 
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8"><?php
-	include "Pet.php"; ?> 
+	<meta charset="utf-8">	
 	<title><?php echo GAMENAME; ?></title>
 	<link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
 	<link href="css/pet.css" rel="stylesheet">
@@ -47,10 +48,14 @@
 <?php 
 	//Query string "Página inicial" ou "Selecionar pets"
 	if(isset($_GET["action"])){
-	if( ($_GET['action'] == NULL) || ($_GET['action'] == "selectPet") || ($_GET['action'] == "home") ) {
-		$conta->protege();
+		if( ($_GET['action'] == NULL)) {
+			$conta->protege();
+			die();
+		}
 ?>
-<?php include "views/inicial.php"; ?>
+<?php if(($_GET['action'] == "selectPet") || ($_GET['action'] == "home")) {
+	include "views/inicial.php";	
+?>
 <?php //--------------------------------------------------------- ?>
 <?php
  } elseif($_GET['action'] == "createPet") {  	?>
